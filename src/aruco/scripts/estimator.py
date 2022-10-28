@@ -77,8 +77,8 @@ def rotationMatrixToEulerAngles(R):
 
 
 # --- Get the camera calibration path
-camera_matrix = np.loadtxt('cameraMatrix.txt', delimiter=',')
-camera_distortion = np.loadtxt('cameraDistortion.txt', delimiter=',')
+camera_matrix = np.loadtxt('/home/gozde/aruconew_ws/src/aruco/scripts/cameraMatrix.txt', delimiter=',')
+camera_distortion = np.loadtxt('/home/gozde/aruconew_ws/src/aruco/scripts/cameraDistortion.txt', delimiter=',')
 
 # --- 180 deg rotation matrix around the x axis
 R_flip = np.zeros((3, 3), dtype=np.float32)
