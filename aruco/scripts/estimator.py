@@ -14,12 +14,16 @@ import logging
 import matplotlib.pyplot as plt
 from aruco_ids import *
 import rospy
+import rospkg
 
 from geometry_msgs.msg import Pose, PoseStamped
 from std_msgs.msg import Header
 # ----------------------------------------------------------------------------------
 # MAIN PARAMETERS
 # ----------------------------------------------------------------------------------
+
+aruco_path = rospkg.RosPack().get_path('aruco') #package path
+
 MARKER_SIZE = 10  # - [cm]
 RECORD = True
 x_position = []
@@ -77,8 +81,8 @@ def rotationMatrixToEulerAngles(R):
 
 
 # --- Get the camera calibration path
-camera_matrix = np.loadtxt('/home/gozde/aruconew_ws/src/aruco/scripts/cameraMatrix.txt', delimiter=',')
-camera_distortion = np.loadtxt('/home/gozde/aruconew_ws/src/aruco/scripts/cameraDistortion.txt', delimiter=',')
+camera_matrix = np.loadtxt(aruco_path + '/scripts/cameraMatrix.txt', delimiter=',')
+camera_distortion = np.loadtxt(aruco_path + '/scripts/cameraDistortion.txt', delimiter=',')
 
 # --- 180 deg rotation matrix around the x axis
 R_flip = np.zeros((3, 3), dtype=np.float32)
@@ -95,7 +99,7 @@ def publish_message():
     pub= rospy.Publisher('/position', PoseStamped, queue_size=1)
    
     # initialize the publishing node
-    rospy.init_node('cam_position', anonymous=True)
+    rospy.init_node('cam_position', anonymous=True, log_level=rospy.DEBUG)
 
     # define how many times per second
     # will the data be published
@@ -204,7 +208,6 @@ def publish_message():
                 # on the terminal and to the log file
                 rospy.loginfo(p)
 
-
                 # publish the data to the topic using publish()
                 pub.publish(p)
 
@@ -230,6 +233,7 @@ def publish_message():
             cv2.destroyAllWindows()
 
             # ------------- Plotting Purposes ----------------
+            """
             plt.title("Pose Estimation")
             plt.plot(x_position)
             plt.xlabel("detection_number")
@@ -251,6 +255,7 @@ def publish_message():
             plt.savefig("yaw_angle.png")
             plt.close()
             result.release()
+            """
             break
 
 
