@@ -22,9 +22,9 @@ x_position = []
 y_position = []
 yaw_angle = []
 
-marker_positions = [id_01, id_06, id_11, id_16, id_21, id_26, id_31, id_36, id_41, id_46, id_51, id_56, id_61, id_66,
-                    id_71, id_76, id_81, id_86, id_91, id_96, id_103, id_108, id_113, id_118, id_123, id_128, id_133, id_138]
-str_marker_positions = ["id_01", "id_06", "id_11", "id_16", "id_21", "id_26", "id_31", "id_36", "id_41", "id_46", "id_51", "id_56", "id_61", "id_66", "id_71", "id_76", "id_81", "id_86", "id_91", "id_96", "id_103", "id_108", "id_113", "id_118", "id_123", "id_128", "id_133", "id_138"]
+marker_positions = [id_006, id_011, id_016, id_021, id_026, id_031, id_036, id_041, id_046, id_051, id_056, id_061, id_066,
+                    id_071, id_076, id_081, id_086, id_091, id_096, id_103, id_108, id_113, id_118, id_123, id_128, id_146, id_133, id_138]
+str_marker_positions = ["id_006", "id_011", "id_016", "id_021", "id_026", "id_031", "id_036", "id_041", "id_046", "id_051", "id_056", "id_061", "id_066", "id_071", "id_076", "id_081", "id_086", "id_091", "id_096", "id_103", "id_108", "id_113", "id_118", "id_123", "id_128", "id_146" , "id_133", "id_138"]
 
 # ------ Position DataS Logging Initializer --------------
 
