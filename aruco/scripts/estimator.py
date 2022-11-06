@@ -38,12 +38,12 @@ str_marker_positions = ["id_00", "id_01", "id_02", "id_03", "id_08", "id_09", "i
 
 logger_file_name = "newfile.log"
 # Create and configure logger
-logging.basicConfig(filename=logger_file_name,
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
+# logging.basicConfig(filename=logger_file_name,
+#                    format='%(asctime)s %(message)s',
+#                    filemode='w')
 # Creating an object
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+#logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
 # ------------------------------------------------------------------------------
 # ------- ROTATIONS https://www.learnopencv.com/rotation-matrix-to-euler-angles/
 # ------------------------------------------------------------------------------
@@ -205,8 +205,8 @@ def publish_message():
                 x_position.append(float(absolute_x_position))
                 y_position.append(float(absolute_y_position))
                 yaw_angle.append(float(yaw_camera))
-                message = f"x position: {absolute_y_position},y position: {absolute_x_position}, yaw angle {yaw_angle}"
-                logger.info(message)
+                #message = f"x position: {absolute_y_position},y position: {absolute_x_position}, yaw angle {yaw_angle}"
+                # logger.info(message)
 
                 p.pose.position.x = float(absolute_x_position)
                 p.pose.position.y = float(absolute_y_position)
@@ -229,8 +229,8 @@ def publish_message():
         # ------------- Video Recording --------------
         if RECORD:
             if one_shot:  # Creates just one times VideoWriter Object
-                result = cv2.VideoWriter("_TRACK.avi", cv2.VideoWriter_fourcc(*'XVID'), 25,
-                                         (frame.shape[1], frame.shape[0]), isColor=True)
+                result = cv2.VideoWriter(filename="_TRACK.avi", fourcc=cv2.VideoWriter_fourcc(*'XVID'), fps=10,
+                                         frameSize=(frame.shape[1], frame.shape[0]), isColor=True)
                 one_shot = False
             result.write(frame)
 
