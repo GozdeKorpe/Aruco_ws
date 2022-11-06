@@ -26,7 +26,7 @@ x_position = []
 y_position = []
 yaw_angle = []
 
-marker_positions = [id_72, id_75,id_97]
+marker_positions = [id_72, id_75, id_97]
 str_marker_positions = ["id_00", "id_01", "id_02", "id_03", "id_08", "id_09", "id_10", "id_11", "id_12", "id_13", "id_14", "id_15", "id_16", "id_72",
                         "id_17", "id_18", "id_19", "id_20", "id_21", "id_22", "id_23", "id_24", "id_25", "id_26", "id_27", "id_28", "id_29", "id_97"]
 
@@ -77,7 +77,8 @@ def rotationMatrixToEulerAngles(R):
 
 
 # --- Get the camera calibration path
-camera_matrix = np.loadtxt('Home/aruco_ws/src/aruco/scripts/cameraMatrix.txt', delimiter=',')
+camera_matrix = np.loadtxt(
+    'Home/aruco_ws/src/aruco/scripts/cameraMatrix.txt', delimiter=',')
 camera_distortion = np.loadtxt('cameraDistortion.txt', delimiter=',')
 
 # --- 180 deg rotation matrix around the x axis
@@ -92,8 +93,8 @@ parameters = aruco.DetectorParameters_create()
 
 
 def publish_message():
-    pub= rospy.Publisher('/position', PoseStamped, queue_size=1)
-   
+    pub = rospy.Publisher('/position', PoseStamped, queue_size=1)
+
     # initialize the publishing node
     rospy.init_node('cam_position', anonymous=True)
 
@@ -118,7 +119,8 @@ def publish_message():
         ret, frame = cap.read()
 
         # -- Convert in gray scale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # -- remember, OpenCV stores color images in Blue, Green, Red
+        # -- remember, OpenCV stores color images in Blue, Green, Red
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # -- Find all the aruco markers in the image
         corners, ids, rejected = aruco.detectMarkers(image=gray, dictionary=aruco_dict, parameters=parameters,
@@ -135,10 +137,12 @@ def publish_message():
 
             # -- Draw the detected marker and put a reference frame over it
             aruco.drawDetectedMarkers(frame, corners)
-            aruco.drawAxis(frame, camera_matrix, camera_distortion, rvec, tvec, 10)
+            aruco.drawAxis(frame, camera_matrix,
+                           camera_distortion, rvec, tvec, 10)
 
             # -- Print the tag position in camera frame
-            str_position = "MARKER Position x=%4.0f  y=%4.0f  z=%4.0f" % (tvec[0], tvec[1], tvec[2])
+            str_position = "MARKER Position x=%4.0f  y=%4.0f  z=%4.0f" % (
+                tvec[0], tvec[1], tvec[2])
             # cv2.putText(frame, str_position, (0, 100), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
             # -- Obtain the rotation matrix tag->camera
@@ -146,27 +150,34 @@ def publish_message():
             R_tc = R_ct.T
 
             # -- Get the attitude in terms of euler 321 (Needs to be flipped first)
-            roll_marker, pitch_marker, yaw_marker = rotationMatrixToEulerAngles(R_flip * R_tc)
+            roll_marker, pitch_marker, yaw_marker = rotationMatrixToEulerAngles(
+                R_flip * R_tc)
 
             # -- Print the marker's attitude respect to camera frame
             str_attitude = "MARKER Attitude r=%4.0f  p=%4.0f  y=%4.0f" % (math.degrees(roll_marker),
-                                                                          math.degrees(pitch_marker),
+                                                                          math.degrees(
+                                                                              pitch_marker),
                                                                           math.degrees(yaw_marker))
             # cv2.putText(frame, str_attitude, (0, 150), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
             # -- Now get Position and attitude for the camera respect to the marker
             pos_camera = -R_tc * np.matrix(tvec).T
 
-            str_position = "CAMERA Position x=%4.0f  y=%4.0f  z=%4.0f" % (pos_camera[0], pos_camera[1], pos_camera[2])
-            cv2.putText(frame, str_position, (0, 20), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            str_position = "CAMERA Position x=%4.0f  y=%4.0f  z=%4.0f" % (
+                pos_camera[0], pos_camera[1], pos_camera[2])
+            cv2.putText(frame, str_position, (0, 20), font,
+                        1, (0, 255, 0), 2, cv2.LINE_AA)
 
             # -- Get the attitude of the camera respect to the frame
-            roll_camera, pitch_camera, yaw_camera = rotationMatrixToEulerAngles(R_flip * R_tc)
+            roll_camera, pitch_camera, yaw_camera = rotationMatrixToEulerAngles(
+                R_flip * R_tc)
             str_attitude = "CAMERA Attitude r=%4.0f  p=%4.0f  y=%4.0f" % (math.degrees(roll_camera),
-                                                                          math.degrees(pitch_camera),
+                                                                          math.degrees(
+                                                                              pitch_camera),
                                                                           math.degrees(yaw_camera))
 
-            cv2.putText(frame, str_attitude, (0, 50), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(frame, str_attitude, (0, 50), font,
+                        1, (0, 255, 0), 2, cv2.LINE_AA)
 
             for item in str_marker_positions:
                 if value < 10:
@@ -184,26 +195,21 @@ def publish_message():
                 yaw_angle.append(float(yaw_camera))
                 message = f"x position: {absolute_y_position},y position: {absolute_x_position}, yaw angle {yaw_angle}"
                 logger.info(message)
-                				
+
                 p = PoseStamped()
                 p.header.seq = 1
-                p.header = Header(stamp = rospy.Time.now(), frame_id = '/camera')
-                                
-                
+                p.header = Header(stamp=rospy.Time.now(), frame_id='/camera')
+
                 p.pose.position.x = float(absolute_x_position)
                 p.pose.position.y = float(absolute_y_position)
-                
 
                 p.pose.orientation.x = float(yaw_camera)
-                
 
                 p.pose.orientation.w = 1.0
-
 
                 # you could simultaneously display the data
                 # on the terminal and to the log file
                 rospy.loginfo(p)
-
 
                 # publish the data to the topic using publish()
                 pub.publish(p)
