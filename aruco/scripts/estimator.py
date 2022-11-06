@@ -106,7 +106,7 @@ def publish_message():
     # define how many times per second
     # will the data be published
     # let's say 10 times/second or 10Hz
-    rate = rospy.Rate(60)
+    rate = rospy.Rate(10)
 
     # --- Capture the video camera
     cap = cv2.VideoCapture(0)
@@ -119,9 +119,16 @@ def publish_message():
     font = cv2.FONT_HERSHEY_PLAIN
 
     one_shot = True
+
+    # -- Ros Message Object
+    p = PoseStamped()
+    p.header.seq = 1
     while not rospy.is_shutdown():
         # -- Read the camera frame
         ret, frame = cap.read()
+
+        # -- Read time ad write it just after image read
+        p.header = Header(stamp=rospy.Time.now(), frame_id='/camera')
 
         # -- Convert in gray scale
         # -- remember, OpenCV stores color images in Blue, Green, Red
@@ -200,10 +207,6 @@ def publish_message():
                 yaw_angle.append(float(yaw_camera))
                 message = f"x position: {absolute_y_position},y position: {absolute_x_position}, yaw angle {yaw_angle}"
                 logger.info(message)
-
-                p = PoseStamped()
-                p.header.seq = 1
-                p.header = Header(stamp=rospy.Time.now(), frame_id='/camera')
 
                 p.pose.position.x = float(absolute_x_position)
                 p.pose.position.y = float(absolute_y_position)
