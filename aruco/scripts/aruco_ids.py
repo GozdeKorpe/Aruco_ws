@@ -119,5 +119,53 @@ id_138 = {
     "x_position": 75,
     "y_position": 945
 }
+id_151 = {
+    "x_position": 0,
+    "y_position": -90
+}
+id_156 = {
+    "x_position": 0,
+    "y_position": 0
+}
+id_161 = {
+    "x_position": 0,
+    "y_position": 90
+}
+id_166 = {
+    "x_position": 0,
+    "y_position": 180
+}
+id_171 = {
+    "x_position": 0,
+    "y_position": 270
+}
+id_176 = {
+    "x_position": 0,
+    "y_position": 360
+}
+id_181 = {
+    "x_position": 0,
+    "y_position": 450
+}
+id_186 = {
+    "x_position": 0,
+    "y_position": 540
+}
+id_191 = {
+    "x_position": 0,
+    "y_position": 630
+}
+id_196 = {
+    "x_position": 0,
+    "y_position": 720
+}
+id_201 = {
+    "x_position": 0,
+    "y_position": 810
+}
+id_206 = {
+    "x_position": 0,
+    "y_position": 900
+}
 
 
