@@ -30,9 +30,8 @@ x_position = []
 y_position = []
 yaw_angle = []
 
-marker_positions = [id_72, id_75, id_97]
-str_marker_positions = ["id_00", "id_01", "id_02", "id_03", "id_08", "id_09", "id_10", "id_11", "id_12", "id_13", "id_14", "id_15", "id_16", "id_72",
-                        "id_17", "id_18", "id_19", "id_20", "id_21", "id_22", "id_23", "id_24", "id_25", "id_26", "id_27", "id_28", "id_29", "id_97"]
+marker_positions = [id_006, id_011, id_016, id_021, id_026, id_031, id_036, id_041, id_046, id_051, id_056, id_061, id_066, id_071, id_076, id_081, id_086, id_091, id_096, id_103, id_108, id_113, id_118, id_123, id_128, id_146 ,id_133, id_138, id_151, id_156, id_161, id_166, id_171, id_176, id_181, id_186, id_191, id_196, id_201, id_206, id_211]
+str_marker_positions = ["id_006", "id_011", "id_016", "id_021", "id_026", "id_031", "id_036", "id_041", "id_046", "id_051", "id_056", "id_061", "id_066", "id_071", "id_076", "id_081", "id_086", "id_091", "id_096", "id_103", "id_108", "id_113", "id_118", "id_123", "id_128", "id_146" ,"id_133", "id_138", "id_151", "id_156", "id_161", "id_166", "id_171", "id_176", "id_181", "id_186", "id_191", "id_196", "id_201", "id_206", "id_211"]
 
 # ------ Position DataS Logging Initializer --------------
 
@@ -109,7 +108,7 @@ def publish_message():
     rate = rospy.Rate(10)
 
     # --- Capture the video camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     # -- Set the camera size as the one it was calibrated with
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -192,7 +191,9 @@ def publish_message():
                         1, (0, 255, 0), 2, cv2.LINE_AA)
 
             for item in str_marker_positions:
-                if value < 10:
+                if (value >= 0) and (value < 10):
+                    str_value = "00"+str(value)
+                elif (value >= 10) and (value < 100):
                     str_value = "0"+str(value)
                 else:
                     str_value = str(value)
@@ -210,14 +211,18 @@ def publish_message():
 
                 p.pose.position.x = float(absolute_x_position)
                 p.pose.position.y = float(absolute_y_position)
+                
 
                 p.pose.orientation.x = float(yaw_camera)
+                
 
                 p.pose.orientation.w = 1.0
+
 
                 # you could simultaneously display the data
                 # on the terminal and to the log file
                 rospy.loginfo(p)
+
 
                 # publish the data to the topic using publish()
                 pub.publish(p)
