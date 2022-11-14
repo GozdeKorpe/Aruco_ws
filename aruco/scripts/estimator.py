@@ -144,8 +144,18 @@ def publish_message():
             absolute_y_position = [0] * len(ids)
             absolute_x_position = [0] * len(ids)
             absolute_distance = [0] * len(ids)
+            aruco.drawDetectedMarkers(frame, corners)
             for i in range(len(ids)):
                 value = ids[i]
+
+                # turnd ndarray value into id_*** string format
+                if (value >= 0) and (value < 10):
+                    str_value = "id_00"+str(np.array2string(value))[1:-1]
+                elif (value >= 10) and (value < 100):
+                    str_value = "id_0"+str(np.array2string(value))[1:-1]
+                else:
+                    str_value = "id_"+str(np.array2string(value))[1:-1]
+
                 ret = aruco.estimatePoseSingleMarkers(corners[i], MARKER_SIZE,
                                                       camera_matrix, camera_distortion)
 
@@ -153,36 +163,64 @@ def publish_message():
                 rvec, tvec = ret[0][0, 0, :], ret[1][0, 0, :]
 
                 # -- Draw the detected marker and put a reference frame over it
-                aruco.drawDetectedMarkers(frame, corners)
+
                 aruco.drawAxis(frame, camera_matrix,
                                camera_distortion, rvec, tvec, 10)
+
+                # -- Obtain the rotation matrix tag->camera
+                R_ct = np.matrix(cv2.Rodrigues(rvec)[0])
+                R_tc = R_ct.T
 
                 # -- Now get Position and attitude for the camera respect to the marker
                 pos_camera = -R_tc * np.matrix(tvec).T
 
+                # -- Get the attitude of the camera respect to the frame
+                roll_camera, pitch_camera, yaw_camera = rotationMatrixToEulerAngles(
+                    R_flip * R_tc)
+
                 for item in str_marker_positions:
-                    if (value >= 0) and (value < 10):
-                        str_value = "00"+str(value)
-                    elif (value >= 10) and (value < 100):
-                        str_value = "0"+str(value)
-                    else:
-                        str_value = str(value)
-                    if str_value in item:
+                    if str_value == item:
                         position_index = str_marker_positions.index(item)
 
                 try:
-                    absolute_y_position[i] = marker_positions[position_index]['y_position'] + pos_camera[1]
-                    absolute_x_position[i] = marker_positions[position_index]['x_position'] + pos_camera[0]
+                    absolute_y_position[i] = marker_positions[position_index]['y_position'] + int(
+                        pos_camera[1])
+                    print({absolute_y_position[i]})
+                    absolute_x_position[i] = marker_positions[position_index]['x_position'] + int(
+                        pos_camera[0])
+                    print({absolute_x_position[i]})
                     absolute_distance[i] = math.sqrt(
                         pos_camera[0]**2+pos_camera[1]**2+pos_camera[2]**2)
-                    # x_position.append(float(absolute_x_position))
-                    # y_position.append(float(absolute_y_position))
-                    # yaw_angle.append(float(yaw_camera))
-                    #message = f"x position: {absolute_y_position},y position: {absolute_x_position}, yaw angle {yaw_angle}"
-                    # logger.info(message)
+                # x_position.append(float(absolute_x_position))
+                # y_position.append(float(absolute_y_position))
+                # yaw_angle.append(float(yaw_camera))
+                #message = f"x position: {absolute_y_position},y position: {absolute_x_position}, yaw angle {yaw_angle}"
+                # logger.info(message)
                 except:
-                    pass
+                    print("Read Error")
+
             try:
+                normalizer_inv = 0
+                floating_x_position = 0
+                floating_y_position = 0
+
+                for i in range(len(absolute_distance)):
+                    normalizer_inv = normalizer_inv + (1/absolute_distance[i])
+                    floating_x_position = floating_x_position + \
+                        absolute_x_position[i] / absolute_distance[i]
+                    floating_y_position = floating_y_position + \
+                        absolute_y_position[i] / absolute_distance[i]
+                # print({normalizer_inv})
+                # print({floating_x_position})
+                # print({floating_y_position})
+
+                floating_x_position = floating_x_position / normalizer_inv
+                floating_y_position = floating_y_position / normalizer_inv
+
+                p.pose.position.x = floating_x_position
+                p.pose.position.y = floating_y_position
+
+                p.pose.orientation.x = float(yaw_camera)
                 # -- Get the attitude in terms of euler 321 (Needs to be flipped first)
                 # roll_marker, pitch_marker, yaw_marker = rotationMatrixToEulerAngles(
                 #    R_flip * R_tc)
@@ -197,43 +235,16 @@ def publish_message():
                 #    tvec[0], tvec[1], tvec[2])
                 # cv2.putText(frame, str_position, (0, 100), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-                # -- Get the attitude of the camera respect to the frame
-                roll_camera, pitch_camera, yaw_camera = rotationMatrixToEulerAngles(
-                    R_flip * R_tc)
+                str_position = "CAMERA Position x=%4.0f  y=%4.0f  z=%4.0f" % (
+                    floating_x_position, floating_y_position, pos_camera[2])
+                cv2.putText(frame, str_position, (0, 20), font,
+                            1, (0, 255, 0), 2, cv2.LINE_AA)
+
                 str_attitude = "CAMERA Attitude r=%4.0f  p=%4.0f  y=%4.0f" % (math.degrees(roll_camera),
                                                                               math.degrees(
                     pitch_camera),
                     math.degrees(yaw_camera))
-
                 cv2.putText(frame, str_attitude, (0, 50), font,
-                            1, (0, 255, 0), 2, cv2.LINE_AA)
-
-                normalizer_inv = 0
-                floating_x_position = 0
-                floating_y_position = 0
-
-                for i in range(len(absolute_distance)):
-                    normalizer_inv = normalizer_inv + (1/absolute_distance[i])
-                    floating_x_position = floating_x_position / \
-                        absolute_distance[i]
-                    floating_y_position = floating_y_position / \
-                        absolute_distance[i]
-
-                floating_x_position = floating_x_position / normalizer_inv
-                floating_y_position = floating_y_position / normalizer_inv
-
-                p.pose.position.x = floating_x_position
-                p.pose.position.y = floating_y_position
-
-                p.pose.orientation.x = float(yaw_camera)
-
-                # -- Obtain the rotation matrix tag->camera
-                R_ct = np.matrix(cv2.Rodrigues(rvec)[0])
-                R_tc = R_ct.T
-
-                str_position = "CAMERA Position x=%4.0f  y=%4.0f  z=%4.0f" % (
-                    floating_x_position, floating_y_position, pos_camera[2])
-                cv2.putText(frame, str_position, (0, 20), font,
                             1, (0, 255, 0), 2, cv2.LINE_AA)
 
                 # you could simultaneously display the data
@@ -243,9 +254,9 @@ def publish_message():
                 # publish the data to the topic using publish()
                 pub.publish(p)
 
-                rate.sleep(20)
+                rate.sleep()
             except:
-                pass
+                print("Publish Error")
 
         # ------------- Video Recording --------------
         if RECORD:
